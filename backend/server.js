@@ -11,7 +11,7 @@ import connectDB from './Config/dbConfig.js';
 
 // app config
 const app = express();
-const port = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 connectDB();
 connectCloudinary();
 
@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
     res.send("API working...")
 })
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 

@@ -1,19 +1,21 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../Context/StoreContext'
 import axios from 'axios';
 import { backendUrl } from '../../App';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPopup = ({ setShowLogin }) => {
 
-    const { setToken } = useContext(StoreContext)
+    const { setToken, redirectPath, setRedirectPath } = useContext(StoreContext)
     const [currState, setCurrState] = useState('Sign Up')
     const [data, setData] = useState({
         name: "",
         email: "",
         password: ""
     })
+    const navigate = useNavigate();
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -36,9 +38,18 @@ const LoginPopup = ({ setShowLogin }) => {
             // call api
             const response = await axios.post(newUrl, data);
             if (response.data.success) {
+                console.log("Redirect Path is:", redirectPath); 
                 setToken(response.data.token)
                 localStorage.setItem("token", response.data.token)
                 setShowLogin(false)
+
+                // redirect logic
+                if (redirectPath) {
+                    navigate(redirectPath);
+                    setRedirectPath(null);
+                } else {
+                    navigate("/")
+                }
             } else {
                 alert(response.data.message)
             }
@@ -47,6 +58,11 @@ const LoginPopup = ({ setShowLogin }) => {
             alert("Something went wrong! Please try again.");
         }
     }
+
+    useEffect(() => {
+  console.log("Redirect Path changed:", redirectPath);
+}, [redirectPath]);
+
 
     return (
         <div className='login-popup'>

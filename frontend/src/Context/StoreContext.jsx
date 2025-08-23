@@ -10,10 +10,10 @@ const StoreContextProvider = (props) => {
     const [token, setToken] = useState("");
     const [cartItems, setCartItems] = useState({});
     const [foodList, setFoodList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [redirectPath, setRedirectPath] = useState(null);
 
     const addToCart = async (itemId) => {
-        console.log("storecontext", cartItems?.[itemId]);
-
         setCartItems((prev) => ({
             ...prev,
             [itemId]: prev[itemId] ? prev[itemId] + 1 : 1
@@ -27,7 +27,6 @@ const StoreContextProvider = (props) => {
             }
         }
     };
-
 
     const removeFromCart = async (itemId) => {
         // setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 })) -  this might cause quantity to become negative. check before subtracting 
@@ -67,13 +66,19 @@ const StoreContextProvider = (props) => {
     }
 
     const fetchFoodList = async () => {
-        const response = await axios.get(backendUrl + "/api/food/list")
-        console.log("Food list fetched from backend:", response.data.foods);
-        setFoodList(response.data.foods)
+        try {
+            const response = await axios.get(backendUrl + "/api/food/list")
+            console.log("Food list fetched from backend:", response.data.foods);
+            setFoodList(response.data.foods)
+        } catch (error) {
+            console.log("Error fetching foods:", error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     // no logout and change in cart data when refresh the page
-    const loadCardData = async (token) => {
+    const loadCartData = async (token) => {
         const response = await axios.post(backendUrl + "/api/cart/get", {}, { headers: { token } })
         setCartItems(response.data.cartData);
     }
@@ -83,7 +88,7 @@ const StoreContextProvider = (props) => {
             await fetchFoodList();
             if (localStorage.getItem("token")) {
                 setToken(localStorage.getItem("token"));
-                await loadCardData(localStorage.getItem("token"))
+                await loadCartData(localStorage.getItem("token"))
             }
         }
         loadData();
@@ -99,13 +104,15 @@ const StoreContextProvider = (props) => {
         getTotalCartAmount,
         backendUrl,
         token,
-        setToken
+        setToken,
+        loading,
+        redirectPath,
+        setRedirectPath
     }
-
 
     // console cartitems - 1:3, 2:0, 3:1
     useEffect(() => {
-        console.log(cartItems)
+        console.log("Cartitem from context", cartItems)
     }, [cartItems])
 
     // when user 1st time added the item in the cart this statement will be executed */

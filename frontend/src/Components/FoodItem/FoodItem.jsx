@@ -2,15 +2,15 @@ import { useContext } from 'react';
 import './FoodItem.css';
 import { assets } from '../../assets/assets';
 import { StoreContext } from '../../Context/StoreContext';
+import Loader from '../Loader/Loader';
 
 const FoodItem = ({ id, name, description, price, image }) => {
 
- const { cartItems, addToCart, removeFromCart } = useContext(StoreContext);
+ const { cartItems, addToCart, removeFromCart, loading } = useContext(StoreContext);
 
   const quantity = cartItems && cartItems[id] ? cartItems[id] : 0;
-  console.log("quantity" + quantity)
-  console.log("id " + id)
 
+  if ( loading ) return <Loader/>
   return (
     <div className='food-item'>
       <div className="food-item-img-container">

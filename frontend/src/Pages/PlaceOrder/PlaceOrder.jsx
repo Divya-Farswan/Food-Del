@@ -1,12 +1,13 @@
-import React, { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StoreContext } from "../../Context/StoreContext";
 import './PlaceOrder.css'
 import { useNavigate } from 'react-router-dom';
+import { backendUrl } from "../../App";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, foodList, cartItems, url } = useContext(StoreContext)
+  const { getTotalCartAmount, token, foodList, cartItems } = useContext(StoreContext)
   const [data, setData] = useState({
-    firtName: "",
+    firstName: "",
     lastName: "",
     email: "",
     street: "",
@@ -23,6 +24,10 @@ const PlaceOrder = () => {
     setData(data => ({ ...data, [name]: value }))
   }
 
+  useEffect(() => {
+    console.log("place order", data)
+  }, [data])
+
   const placeOrder = async (event) => {
     event.preventDefault();
     let orderItems = [];
@@ -34,13 +39,15 @@ const PlaceOrder = () => {
       }
     })
 
+    console.log(orderItems);
+
     let orderData = {
       address: data,
       item: orderItems,
       amount: getTotalCartAmount() + 2,
     }
 
-    let response = await axios.post(url + "/api/order/place", orderData, { headers: { token } })
+    let response = await axios.post(backendUrl + "/api/order/place", orderData, { headers: { token } })
     if (response.data.success) {
       const { session_url } = response.data;
       window.location.replace(session_url);
@@ -69,7 +76,7 @@ const PlaceOrder = () => {
         <div className="place-order-left">
           <p className="title">Delivery Information</p>
           <div className="multi-fields">
-            <input name="firstName" value={data.firtName} onChange={onChangeHandler} required type="text" placeholder="First Name" />
+            <input name="firstName" value={data.firstName} onChange={onChangeHandler} required type="text" placeholder="First Name" />
             <input name="lastName" value={data.lastName} onChange={onChangeHandler} required type="text" placeholder="Last Name" />
           </div>
 

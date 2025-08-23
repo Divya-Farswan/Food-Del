@@ -3,7 +3,7 @@ import './Cart.css'
 import { StoreContext } from '../../Context/StoreContext';
 import { useNavigate } from 'react-router-dom';
 const Cart = () => {
-  const { cartItems, removeFromCart, food_list, getTotalCartAmount, url } = useContext(StoreContext)
+  const { cartItems, removeFromCart, foodList, getTotalCartAmount } = useContext(StoreContext)
   const navigate = useNavigate();
 
   return (
@@ -21,13 +21,14 @@ const Cart = () => {
 
         <br />
         <hr />
+        
 
-        {food_list.map((item, index) => {
+        {foodList.map((item, index) => {
           if (cartItems[item._id] > 0) {
             return (
-              <div>
-                <div className="cart-items-title cart-items-item">
-                  <img src={image} alt="" />
+              <div key={item._id || index}>
+                <div  className="cart-items-title cart-items-item">
+                  <img src={item.image} alt={item.name} />
                   <p>{item.name}</p>
                   <p>${item.price}</p>
                   <p>{cartItems[item._id]}</p>
@@ -39,6 +40,7 @@ const Cart = () => {
               </div>
             )
           }
+          return null;
         })}
 
         <div className="cart-bottom">
@@ -63,7 +65,7 @@ const Cart = () => {
                 <b>${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}</b>
               </div>
             </div>
-            <button onClick={() => navigate('/order')} >PROCEED TO CHECKOUT</button>
+            <button onClick={() => navigate('/order')} disabled={getTotalCartAmount() === 0} >PROCEED TO CHECKOUT</button>
           </div>
 
           <div className="cart-promocode">

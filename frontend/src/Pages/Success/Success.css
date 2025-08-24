@@ -1,0 +1,24 @@
+.success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.success-title {
+  font-size: 1.875rem; /* ~text-3xl */
+  font-weight: bold;
+  color: #16a34a; /* Tailwind green-600 */
+}
+
+.success-message {
+  font-size: 1.125rem; /* ~text-lg */
+  margin-top: 0.5rem;
+}
+
+.success-redirect {
+  margin-top: 0.25rem;
+  color: #6b7280; /* Tailwind gray-500 */
+}

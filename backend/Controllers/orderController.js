@@ -6,7 +6,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const placeOrder = async (req, res) => {
 
-  const frontend_url = "http://localhost:5174"
+  const frontend_url = process.env.FRONTEND_URL;
+
   try {
     // new order
     const newOrder = new orderModel({
@@ -27,12 +28,12 @@ const placeOrder = async (req, res) => {
       price_data: {
         currency: "inr",
         product_data: {
-          name: item.name
+          name: item.name,
         },
-        unit_amount: item.price * 100 * 80
+        unit_amount: item.price * 100
       },
 
-      quantity: item_quantity
+      quantity: item.quantity,
     }))
 
     // push delivery charges in line_items
@@ -42,24 +43,24 @@ const placeOrder = async (req, res) => {
         product_data: {
           name: "Delivery Charges"
         },
-        unit_amount: 2 * 100 * 80
+        unit_amount: 2000,
       },
-      quantity: 1
+      quantity: 1,
     })
 
     // create session using line_items
     const session = await stripe.checkout.sessions.create({
       line_items: line_items,
       mode: 'payment',
-      success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
-      cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`
+      success_url: process.env.FRONTEND_URL + "/success",
+      cancel_url: process.env.FRONTEND_URL + "/cancel",
     })
 
     res.json({ success: true, session_url: session.url });
 
   } catch (error) {
     console.log(error)
-    res.json({ success:false, message: "Error" });
+    res.json({ success: false, message: "Error" });
   }
 };
 
@@ -75,8 +76,5 @@ const userOrders = async (req, res) => {
 
 }
 
-const verifyOrder = async (req, res) => {
 
-}
-
-export {listOrders, placeOrder, updateStatus, userOrders, verifyOrder};
+export { listOrders, placeOrder, updateStatus, userOrders };

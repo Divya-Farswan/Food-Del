@@ -3,6 +3,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import './PlaceOrder.css'
 import { useNavigate } from 'react-router-dom';
 import { backendUrl } from "../../App";
+import axios from "axios";
 
 const PlaceOrder = () => {
   const { getTotalCartAmount, token, foodList, cartItems } = useContext(StoreContext)
@@ -25,50 +26,69 @@ const PlaceOrder = () => {
   }
 
   useEffect(() => {
-    console.log("place order", data)
+    console.log("place order data", data)
   }, [data])
 
   const placeOrder = async (event) => {
     event.preventDefault();
+    console.log("cartItems before order:", cartItems);
+
     let orderItems = [];
     foodList.map((item) => {
       if (cartItems[item._id] > 0) {
-        let itemInfo = item;
+        let itemInfo = { ...item }; // clone to avoid mutation
         itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo)
+        orderItems.push(itemInfo);
       }
-    })
+    });
 
-    console.log(orderItems);
+    console.log("Order items:", orderItems);
 
     let orderData = {
       address: data,
-      item: orderItems,
+      items: orderItems,
       amount: getTotalCartAmount() + 2,
-    }
+    };
 
-    let response = await axios.post(backendUrl + "/api/order/place", orderData, { headers: { token } })
-    if (response.data.success) {
-      const { session_url } = response.data;
-      window.location.replace(session_url);
-    }
-    else {
-      alert("Error")
-    }
-  }
+    try {
+      let response = await axios.post(
+        backendUrl + "/api/order/place",
+        orderData,
+        { headers: { token } }
+      );
 
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!token) {
-      navigate('/cart')
-    }
-    else {
-      if (getTotalCartAmount() ===0) {
-        navigate('/cart')
+      console.log("Axios response:", response);  //  log full response object
+      console.log("Axios response data:", response.data); //  log only data
+
+      if (response.data.success) {
+        const { session_url } = response.data;
+        console.log("Stripe session response:", response.data);
+
+        // redirect
+        window.location.href = session_url; // use href instead of replace to debug
+      } else {
+        alert("Error: " + JSON.stringify(response.data.message));
       }
+    } catch (err) {
+      console.error("Place order API error:", err.response || err);
+      alert("Something went wrong with order. Check console.");
     }
-  }, [token]);
-  
+  };
+
+
+
+  // const navigate = useNavigate();
+  // useEffect(() => {
+  //   if (!token) {
+  //     navigate('/cart')
+  //   }
+  //   else {
+  //     if (getTotalCartAmount() ===0) {
+  //       navigate('/cart')
+  //     }
+  //   }
+  // }, [token]);
+
   return (
     <div>
       <form onSubmit={placeOrder} className="place-order">

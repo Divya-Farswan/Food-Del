@@ -4,16 +4,19 @@ import 'dotenv/config';
 import foodRouter from './Routes/foodRoute.js';
 import userRouter from './Routes/userRoute.js';
 import cartRouter from './Routes/cartRoute.js';
-import { verifyOrder } from './Controllers/orderController.js';
 import orderRouter from './Routes/orderRoute.js';
 import connectCloudinary from './Config/cloudinaryConfig.js';
 import connectDB from './Config/dbConfig.js';
+import paymentRouter from './Routes/paymentRoute.js';
 
 // app config
 const app = express();
 const PORT = 5000 || process.env.PORT;
 connectDB();
 connectCloudinary();
+
+// payment 
+app.use("/api/payment", paymentRouter)
 
 //middleware
 app.use(express.json())
@@ -24,7 +27,6 @@ app.use("/api/food", foodRouter);
 app.use("/api/user", userRouter)
 app.use("/api/cart", cartRouter)
 app.use("/api/order", orderRouter)
-app.use("/api/verify", verifyOrder)
 
 app.get("/", (req, res) => {
     res.send("API working...")
